@@ -150,6 +150,11 @@ const Login = () => {
             </Link>
           </p>
         </form>
+        <p className="text-sm mt-3 text-right">
+  <Link to="/forgot-password" className="text-indigo-600 hover:underline">
+    Forgot Password?
+  </Link>
+</p>
       </motion.div>
     </div>
   );
