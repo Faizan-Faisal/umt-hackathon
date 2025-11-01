@@ -1,16 +1,17 @@
-# main.py
 from fastapi import FastAPI
 from database.connection import init_db
-from routes import auth
+from routes import auth_routes, job_routes, application_routes
 
 app = FastAPI(title="CampusConnect Backend")
 
 @app.on_event("startup")
-async def start_database():
+async def startup_event():
     await init_db()
 
-app.include_router(auth.router)
+app.include_router(auth_routes.router)
+app.include_router(job_routes.router)
+app.include_router(application_routes.router)
 
 @app.get("/")
-async def root():
-    return {"message": "CampusConnect Backend is running 🚀"}
+def root():
+    return {"message": "Welcome to CampusConnect API 🚀"}
