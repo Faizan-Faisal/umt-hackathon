@@ -1,7 +1,7 @@
 # utils/recommendation.py
 from typing import List, Dict
 from models.user_model import User
-from models.job_model import JobPost
+from models.job_model import Job
 
 def compute_match_score(user_skills: List[str], job_tags: List[str]) -> float:
     """
@@ -27,7 +27,7 @@ def compute_match_score(user_skills: List[str], job_tags: List[str]) -> float:
     return round(score * 100, 2)
 
 
-def rank_jobs_for_user(user: User, jobs: List[JobPost]) -> List[Dict]:
+def rank_jobs_for_user(user: User, jobs: List[Job]) -> List[Dict]:
     """
     Returns a list of dicts: {job, match_score}, sorted by score desc.
     """

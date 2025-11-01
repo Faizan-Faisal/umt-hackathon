@@ -3,6 +3,7 @@ from models.job_model import Job
 from core.dependencies import get_current_user
 from pydantic import BaseModel
 from typing import List, Optional
+from utils.recommendation import rank_jobs_for_user
 
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
 
@@ -121,3 +122,20 @@ async def filter_jobs(
         jobs = await Job.find(query).limit(limit).to_list()
 
     return {"results": jobs, "filters_used": query}
+
+
+# ----------------------------
+# ⭐ Get Recommended Jobs for User
+# ----------------------------
+@router.get("/recommended")
+async def get_recommended_jobs(current_user=Depends(get_current_user)):
+    """Get personalized job recommendations based on user skills"""
+    all_jobs = await Job.find_all().to_list()
+    if not all_jobs:
+        return {"message": "No jobs available", "recommendations": []}
+    
+    ranked = rank_jobs_for_user(current_user, all_jobs)
+    return {
+        "total_jobs": len(all_jobs),
+        "recommendations": ranked
+    }
