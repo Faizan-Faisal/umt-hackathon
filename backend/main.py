@@ -1,6 +1,7 @@
 # main.py
 from fastapi import FastAPI
 from database.connection import init_db
+from routes import auth
 
 app = FastAPI(title="CampusConnect Backend")
 
@@ -8,6 +9,8 @@ app = FastAPI(title="CampusConnect Backend")
 async def start_database():
     await init_db()
 
+app.include_router(auth.router)
+
 @app.get("/")
-async def home():
-    return {"message": "CampusConnect Backend is Running 🚀"}
+async def root():
+    return {"message": "CampusConnect Backend is running 🚀"}

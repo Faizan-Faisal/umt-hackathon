@@ -1,7 +1,7 @@
 # models/user_model.py
 from beanie import Document
-from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from pydantic import EmailStr, Field
+from typing import List, Optional
 from datetime import datetime
 
 class User(Document):
@@ -9,24 +9,24 @@ class User(Document):
     email: EmailStr
     password: str
     role: str = "seeker"  # seeker or finder
+    is_verified: bool = False
     skills: List[str] = []
     interests: List[str] = []
     bio: Optional[str] = None
     profile_image: Optional[str] = None
-    is_verified: bool = False
-    created_at: datetime = datetime.utcnow()
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
     class Settings:
         name = "users"
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "name": "Faizan Faisal",
                 "email": "faizan@example.com",
                 "password": "hashed_password",
                 "role": "finder",
-                "skills": ["Python", "FastAPI", "MongoDB"],
-                "bio": "Backend developer passionate about building AI-integrated systems."
+                "skills": ["Python", "FastAPI"],
+                "bio": "Backend developer passionate about AI."
             }
         }
