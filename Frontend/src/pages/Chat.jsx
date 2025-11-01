@@ -20,8 +20,12 @@ const Chat = () => {
   const socketRef = useRef(null);
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
+  // Normalize user id because some places use `id` and others use `_id`
+  const userId = user?.id || user?._id || null;
+
   useEffect(() => {
-    if (!user.id) {
+    // If there's no user id, redirect to login
+    if (!userId) {
       navigate('/login');
       return;
     }
@@ -31,17 +35,19 @@ const Chat = () => {
     // If we have a conversationId, connect WebSocket and load messages
     if (conversationId) {
       const roomId = conversationId;
+
       const onMessage = (data) => {
         setMessages((prev) => [...prev, data]);
         scrollToBottom();
       };
+
       const onError = (error) => {
         console.error('WebSocket error:', error);
       };
 
       socketRef.current = chatService.connect(
         roomId,
-        user.id,
+        userId,
         user.name || 'User',
         onMessage,
         onError
@@ -53,7 +59,8 @@ const Chat = () => {
     return () => {
       chatService.disconnect();
     };
-  }, [user.id, conversationId, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId, navigate]);
 
   useEffect(() => {
     if (conversationId) {
@@ -128,9 +135,7 @@ const Chat = () => {
                 conversations.map((conv) => (
                   <div
                     key={conv.id}
-                    onClick={() => {
-                      navigate(`/chat/${conv.id}`);
-                    }}
+                    onClick={() => navigate(`/chat/${conv.id}`)}
                     className={`p-4 border-b border-white/30 cursor-pointer transition-all ${
                       conversationId === conv.id
                         ? 'bg-gradient-to-r from-indigo-50 to-purple-50 border-l-4 border-indigo-500'
@@ -138,7 +143,7 @@ const Chat = () => {
                     }`}
                   >
                     <div className="font-semibold text-gray-900">
-                      {conv.jobTitle || conv.participants?.find((p) => p.id !== user.id && p.id !== user._id)?.name || 'Chat'}
+                      {conv.jobTitle || conv.participants?.find((p) => p.id !== userId)?.name || 'Chat'}
                     </div>
                     <div className="text-sm text-gray-600 truncate">
                       {conv.lastMessage || 'No messages yet'}
@@ -169,7 +174,7 @@ const Chat = () => {
                       {conversations.find(c => c.id === conversationId)?.jobTitle || 'Chat Room'}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      {conversations.find(c => c.id === conversationId)?.participants?.find(p => p.id !== user.id && p.id !== user._id)?.name || 'Chatting about this job'}
+                      {conversations.find(c => c.id === conversationId)?.participants?.find(p => p.id !== userId)?.name || 'Chatting about this job'}
                     </p>
                   </div>
                   <Link
@@ -193,20 +198,20 @@ const Chat = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2 }}
-                        className={`flex ${msg.sender_id === user.id || msg.sender_id === user._id ? 'justify-end' : 'justify-start'}`}
+                        className={`flex ${msg.sender_id === userId ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
                           className={`max-w-xs md:max-w-md px-5 py-3 rounded-2xl ${
-                            msg.sender_id === user.id || msg.sender_id === user._id
+                            msg.sender_id === userId
                               ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white'
                               : 'bg-gray-100 text-gray-900'
                           } shadow-md`}
                         >
-                          {msg.sender_id !== user.id && msg.sender_id !== user._id && (
+                          {msg.sender_id !== userId && (
                             <p className="text-xs mb-1 opacity-70">{msg.sender_name || 'User'}</p>
                           )}
                           <p className="text-sm">{msg.message}</p>
-                          <p className={`text-xs mt-1 opacity-70 ${msg.sender_id === user.id || msg.sender_id === user._id ? 'text-right' : 'text-left'}`}>
+                          <p className={`text-xs mt-1 opacity-70 ${msg.sender_id === userId ? 'text-right' : 'text-left'}`}>
                             {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
